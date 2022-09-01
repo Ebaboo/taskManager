@@ -44,7 +44,7 @@ const userController = {
       });
 
       const token = jwt.sign({ uid: user?.id }, process.env.JWT_SECRET!, {
-        expiresIn: "1d",
+        expiresIn: "7d",
       });
 
       if (!user) {
