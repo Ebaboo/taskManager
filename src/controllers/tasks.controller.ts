@@ -57,7 +57,7 @@ const tasksController = {
         userId: req.user?.id,
       },
     });
-    res.status(200).send(tasks);
+    res.status(200).send({ tasks });
   },
   createTask: async (
     req: Request<unknown, CreateTaskPayload, Task>,
@@ -86,7 +86,7 @@ const tasksController = {
         },
       });
 
-      res.status(201).send(task);
+      res.status(201).send({ task });
       return;
     } catch (err) {
       next(err);
@@ -137,7 +137,7 @@ const tasksController = {
         },
       });
 
-      res.status(201).send(task);
+      res.status(201).send({ task });
       return;
     } catch (err) {
       next(err);

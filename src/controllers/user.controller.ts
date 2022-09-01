@@ -11,7 +11,6 @@ interface RegisterResponse {
 interface LoginResponse {
   email: string;
   name: string;
-  token: string;
   id: string;
 }
 
@@ -58,9 +57,14 @@ const userController = {
         return;
       }
 
-      res
-        .status(200)
-        .send({ email: user.email, name: user.name, id: user.id, token });
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+
+      res.status(200).send({ email: user.email, name: user.name, id: user.id });
     } catch (err) {
       next(err);
     }
