@@ -76,15 +76,19 @@ const userController = {
   ) => {
     try {
       const { email, password, name } = registerPayloadSchema.parse(req.body);
-      const user = await prisma.user.create({
-        data: {
-          email,
-          password: await hash(password, 10),
-          name,
-        },
-      });
-
-      res.status(200).send({ email: user.email });
+      try {
+        const user = await prisma.user.create({
+          data: {
+            email,
+            password: await hash(password, 10),
+            name,
+          },
+        });
+        res.status(200).send({ email: user.email });
+      } catch (e) {
+        next(new Error("User already exists"));
+        return;
+      }
     } catch (err) {
       next(err);
     }
