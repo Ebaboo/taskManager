@@ -60,8 +60,8 @@ const userController = {
       res.cookie("token", token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+	path: "/",
+	sameSite: "none",
       });
 
       res.status(200).send({ email: user.email, name: user.name, id: user.id });
