@@ -59,6 +59,28 @@ const tasksController = {
     });
     res.status(200).send({ tasks });
   },
+  getTask: async (
+    req: Request<any, UpdateTaskPayload>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const task = await prisma.task.findUnique({
+        where: {
+          id: req.params.id,
+        },
+      });
+
+      if (!task) {
+        next({ message: "Task not found" });
+      }
+
+      res.status(200).send({ task });
+      return;
+    } catch (err) {
+      next(err);
+    }
+  },
   createTask: async (
     req: Request<unknown, CreateTaskPayload, Task>,
     res: Response,

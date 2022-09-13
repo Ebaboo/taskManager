@@ -37,6 +37,7 @@ const userController = {
   ) => {
     try {
       const { email, password } = loginPayloadSchema.parse(req.body);
+      console.log("huy");
       const user = await prisma.user.findUnique({
         where: {
           email,
@@ -60,7 +61,7 @@ const userController = {
       res.cookie("token", token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7,
-        sameSite: "lax",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production",
       });
 
