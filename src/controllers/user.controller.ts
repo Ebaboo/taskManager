@@ -37,6 +37,7 @@ const userController = {
   ) => {
     try {
       const { email, password } = loginPayloadSchema.parse(req.body);
+      console.log("huy");
       const user = await prisma.user.findUnique({
         where: {
           email,
