@@ -61,8 +61,8 @@ const userController = {
       res.cookie("token", token, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7,
+        path: "/",
         sameSite: "none",
-        secure: process.env.NODE_ENV === "production",
       });
 
       res.status(200).send({ email: user.email, name: user.name, id: user.id });
