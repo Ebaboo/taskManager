@@ -167,9 +167,22 @@ const tasksController = {
   },
   deleteTask: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await prisma.user.delete({
+      const task = await prisma.task.findFirst({
         where: {
           id: req.params.id,
+        },
+      });
+
+      if (!!task && task?.userId !== req.user?.id) {
+        next({ message: "You cannot delete task, that made by other users" });
+        return;
+      }
+
+      console.log(task?.id);
+
+      await prisma.task.delete({
+        where: {
+          id: task?.id || "",
         },
       });
 
@@ -180,7 +193,7 @@ const tasksController = {
         next({ message: err?.meta?.cause });
         return;
       }
-      next("Somethign wetn wrong");
+      next("Something went wrong");
     }
   },
 };
