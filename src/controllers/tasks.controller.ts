@@ -1,7 +1,8 @@
 import { Prisma, Task } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prismaClient";
-import { z, ZodError } from "zod";
+import { z } from "zod";
+import { startOfDay, endOfDay } from "date-fns";
 
 const createTaskPayloadSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 chars long" }),
@@ -203,14 +204,25 @@ const tasksController = {
       },
       select: {
         dueDate: true,
-        id: true,
       },
     });
-    res
-      .status(200)
-      .send({
-        dates: tasks.map((task) => ({ id: task.id, dueDate: task.dueDate })),
-      });
+    res.status(200).send({
+      dates: tasks.map((task) => task.dueDate),
+    });
+  },
+  getTasksByDay: async (req: Request, res: Response, next: NextFunction) => {
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: req.user?.id,
+        dueDate: {
+          gte: startOfDay(new Date(req.params.date)),
+          lte: endOfDay(new Date(req.params.date)),
+        },
+      },
+    });
+    res.status(200).send({
+      dates: tasks.map((task) => task.dueDate),
+    });
   },
 };
 
