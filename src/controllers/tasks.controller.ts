@@ -205,7 +205,7 @@ const tasksController = {
         dueDate: true,
       },
     });
-    res.status(200).send({ tasks });
+    res.status(200).send({ dates: tasks.map((task) => task.dueDate) });
   },
 };
 
