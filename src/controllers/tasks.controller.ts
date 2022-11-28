@@ -211,11 +211,16 @@ const tasksController = {
     });
   },
   getTasksByDay: async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.params.date) {
+    const date = req.query.date;
+
+    if (!date) {
       next({ message: "Date is required" });
       return;
     }
-    if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(req.params.date)) {
+
+    const dateParsed = new Date(Date.parse(date.toString()));
+
+    if (dateParsed.toUTCString() !== date) {
       next({ message: "Wrong format" });
       return;
     }
