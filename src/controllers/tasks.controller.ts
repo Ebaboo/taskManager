@@ -159,6 +159,8 @@ const tasksController = {
         },
       });
 
+      console.log("huy");
+
       res.status(201).send({ task });
       return;
     } catch (err) {
@@ -199,4 +201,3 @@ const tasksController = {
 };
 
 export default tasksController;
-
