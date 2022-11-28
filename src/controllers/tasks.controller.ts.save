@@ -1,4 +1,4 @@
-import { Prisma, Task } from "@prisma/client";
+import { Task } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prismaClient";
 import { z, ZodError } from "zod";
@@ -162,41 +162,22 @@ const tasksController = {
       res.status(201).send({ task });
       return;
     } catch (err) {
-      next(err);
+      net(err);
     }
   },
   deleteTask: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const task = await prisma.task.findFirst({
+      await prisma.user.update({
         where: {
-          id: req.params.id,
+          id: req.user?.id,
         },
-      });
-
-      if (!!task && task?.userId !== req.user?.id) {
-        next({ message: "You cannot delete task, that made by other users" });
-        return;
-      }
-
-      console.log(task?.id);
-
-      await prisma.task.delete({
-        where: {
-          id: task?.id || "",
-        },
-      });
-
-      res.status(201).send({ message: "Task deleted" });
-      return;
-    } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        next({ message: err?.meta?.cause });
-        return;
-      }
-      next("Something went wrong");
-    }
-  },
+        data: {
+          Tasks: {
+            delete: {
+              id: req.params.id,
+            },
+          },
+        }
 };
 
 export default tasksController;
-
