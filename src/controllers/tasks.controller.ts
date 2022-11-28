@@ -159,8 +159,6 @@ const tasksController = {
         },
       });
 
-      console.log("huy");
-
       res.status(201).send({ task });
       return;
     } catch (err) {
@@ -197,6 +195,17 @@ const tasksController = {
       }
       next("Something went wrong");
     }
+  },
+  getAllTasksDates: async (req: Request, res: Response, next: NextFunction) => {
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: req.user?.id,
+      },
+      select: {
+        dueDate: true,
+      },
+    });
+    res.status(200).send({ tasks });
   },
 };
 
