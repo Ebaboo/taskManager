@@ -203,9 +203,14 @@ const tasksController = {
       },
       select: {
         dueDate: true,
+        id: true,
       },
     });
-    res.status(200).send({ dates: tasks.map((task) => task.dueDate) });
+    res
+      .status(200)
+      .send({
+        dates: tasks.map((task) => ({ id: task.id, dueDate: task.dueDate })),
+      });
   },
 };
 
