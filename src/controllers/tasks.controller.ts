@@ -211,6 +211,15 @@ const tasksController = {
     });
   },
   getTasksByDay: async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.params.date) {
+      next({ message: "Date is required" });
+      return;
+    }
+    if (!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(req.params.date)) {
+      next({ message: "Wrong format" });
+      return;
+    }
+
     const tasks = await prisma.task.findMany({
       where: {
         userId: req.user?.id,
