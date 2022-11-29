@@ -2,7 +2,8 @@ import { Prisma, Task } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prismaClient";
 import { z } from "zod";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, parseISO } from "date-fns";
+import { zonedTimeToUtc } from "date-fns-tz";
 
 const createTaskPayloadSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 chars long" }),
@@ -218,24 +219,38 @@ const tasksController = {
       return;
     }
 
-    const dateParsed = new Date(Date.parse(date.toString()));
-
-    if (dateParsed.toUTCString() !== date) {
+    if (
+      !/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/.test(
+        date.toString()
+      )
+    ) {
       next({ message: "Wrong format" });
       return;
     }
+
+    const startDate = parseISO(
+      date.toString().replace(/(?<=T)(.*?)(?=Z)/, "00:00:00.000")
+    );
+
+    const endDate = parseISO(
+      date.toString().replace(/(?<=T)(.*?)(?=Z)/, "23:59:59.000")
+    );
 
     const tasks = await prisma.task.findMany({
       where: {
         userId: req.user?.id,
         dueDate: {
-          gte: startOfDay(new Date(req.params.date)),
-          lte: endOfDay(new Date(req.params.date)),
+          gte: startDate,
+          lte: endDate,
         },
       },
+      orderBy: {
+        dueDate: "asc",
+      },
     });
+
     res.status(200).send({
-      dates: tasks.map((task) => task.dueDate),
+      tasks,
     });
   },
 };
