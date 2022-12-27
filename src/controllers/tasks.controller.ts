@@ -225,7 +225,7 @@ const tasksController = {
       );
 
     const isNotShortDate =
-      !/\d{2}-\d{2}-\d{4}/.test(date.toString()) ||
+      !/\d{2}-\d{2}-\d{4}/.test(date.toString()) &&
       !/\d{2}\/\d{2}\/\d{4}/.test(date.toString());
 
     if ((isNotIsoDate && isNotShortDate) || typeof date !== "string") {
