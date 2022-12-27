@@ -2,8 +2,8 @@ import { Prisma, Task } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prismaClient";
 import { z } from "zod";
-import { parseISO } from "date-fns";
-import {} from "date-fns-tz";
+import { parse, parseISO, toDate } from "date-fns";
+import { zonedTimeToUtc } from "date-fns-tz";
 
 const createTaskPayloadSchema = z.object({
   title: z.string().min(2, { message: "Title must be at least 2 chars long" }),
@@ -225,7 +225,7 @@ const tasksController = {
       );
 
     const isNotShortDate =
-      !/\d{2}-\d{2}-\d{4}/.test(date.toString()) &&
+      !/\d{2}-\d{2}-\d{4}/.test(date.toString()) ||
       !/\d{2}\/\d{2}\/\d{4}/.test(date.toString());
 
     if ((isNotIsoDate && isNotShortDate) || typeof date !== "string") {
