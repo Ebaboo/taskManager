@@ -241,7 +241,7 @@ const tasksController = {
 
     try {
       shortDateToDate = new Date(convertedDate);
-      notIsoDate = new Date(shortDateToDate.valueOf() - TZOffset * 60 * 1000);
+      notIsoDate = new Date(shortDateToDate.valueOf() + TZOffset * 60 * 1000);
     } catch {
       next({ message: "Wrong format" });
       return;
