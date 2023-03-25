@@ -216,7 +216,12 @@ const tasksController = {
     }>;
 
     if (!date || !TZOffset) {
-      next({ message: "Date is required" });
+      next({ message: "Date query param is required" });
+      return;
+    }
+
+    if (!TZOffset) {
+      next({ message: "TZOffset query param is required" });
       return;
     }
 
