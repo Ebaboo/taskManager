@@ -2,7 +2,7 @@ import { Prisma, Task } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../../prisma/prismaClient";
 import { z } from "zod";
-import { parse, parseISO, toDate } from "date-fns";
+import { addHours, addMinutes, addSeconds } from "date-fns";
 import { zonedTimeToUtc } from "date-fns-tz";
 
 const createTaskPayloadSchema = z.object({
@@ -180,8 +180,6 @@ const tasksController = {
         return;
       }
 
-      console.log(task?.id);
-
       await prisma.task.delete({
         where: {
           id: task?.id || "",
@@ -212,9 +210,12 @@ const tasksController = {
     });
   },
   getTasksByDay: async (req: Request, res: Response, next: NextFunction) => {
-    const date = req.query.date;
+    const { date, TZOffset } = req.query as Partial<{
+      date: string;
+      TZOffset: number;
+    }>;
 
-    if (!date) {
+    if (!date || !TZOffset) {
       next({ message: "Date is required" });
       return;
     }
@@ -223,6 +224,8 @@ const tasksController = {
       !/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/.test(
         date.toString()
       );
+
+    const convertedDate = new Date(date.toString());
 
     const isNotShortDate =
       !/\d{2}-\d{2}-\d{4}/.test(date.toString()) &&
@@ -237,23 +240,18 @@ const tasksController = {
     let notIsoDate = null;
 
     try {
-      shortDateToDate = new Date(date);
-      notIsoDate = new Date(
-        shortDateToDate.valueOf() -
-          shortDateToDate.getTimezoneOffset() * 60 * 1000
-      );
+      shortDateToDate = new Date(convertedDate);
+      notIsoDate = new Date(shortDateToDate.valueOf() - TZOffset * 60 * 1000);
     } catch {
       next({ message: "Wrong format" });
       return;
     }
 
-    const startDate = !isNotIsoDate
-      ? parseISO(date.replace(/(?<=T)(.*?)(?=Z)/, "00:00:00.000"))
-      : notIsoDate.toISOString().replace(/(?<=T)(.*?)(?=Z)/, "00:00:00.000");
+    const startDate = notIsoDate;
 
-    const endDate = !isNotIsoDate
-      ? parseISO(date.replace(/(?<=T)(.*?)(?=Z)/, "23:59:59.000"))
-      : notIsoDate.toISOString().replace(/(?<=T)(.*?)(?=Z)/, "23:59:59.000");
+    const endDate = addSeconds(addMinutes(addHours(startDate, 23), 59), 59);
+
+    console.log(startDate, endDate);
 
     try {
       const tasks = await prisma.task.findMany({
